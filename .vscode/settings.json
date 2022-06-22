@@ -1,3 +1,0 @@
-{
-  "cmake.configureArgs": ["-DSYCL_BACKEND=hipSYCL", "-DSYCL_DEVICE=gpu"]
-}
