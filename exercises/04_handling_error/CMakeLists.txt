@@ -1,21 +1,21 @@
-project(04_hadling_error)
+project(04_handling_error)
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
-add_executable(succoapera)
+add_executable(handling_error)
 
 option(SYCL_BACKEND "Enable selected SYCL backend" "")
 option(SYCL_DEVICE "Select target SYCL device" GPU)
 
-target_include_directories(succoapera
+target_include_directories(handling_error
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_sources(succoapera PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/src/succoapera.cpp
+target_sources(handling_error PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src/handling_error.cpp
 )
 
-set_target_properties(succoapera PROPERTIES
+set_target_properties(handling_error PROPERTIES
 	PUBLIC_HEADER
 	${CMAKE_CURRENT_SOURCE_DIR}/include/include.hpp
 )
@@ -37,7 +37,7 @@ else()
 	message(FATAL_ERROR "Unknown device selected: ${SYCL_DEVICE}" )
 endif()
 
-add_compile_definitions(succoapera
+add_compile_definitions(handling_error
 	CPU_DEVICE=${CPU_DEVICE}
 	GPU_DEVICE=${GPU_DEVICE}
 	HOST_DEVICE=${HOST_DEVICE}
@@ -46,7 +46,7 @@ add_compile_definitions(succoapera
 
 if(SYCL_BACKEND STREQUAL hipSYCL)
 	find_package(hipSYCL REQUIRED)
-	add_sycl_to_target(TARGET succoapera)
+	add_sycl_to_target(TARGET handling_error)
 endif()
 
 message(STATUS "SYCL_BACKEND: ${SYCL_BACKEND}")
