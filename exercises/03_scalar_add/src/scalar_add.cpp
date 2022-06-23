@@ -1,7 +1,6 @@
 #include <include.hpp>
 
-int main()
-{
+int main() {
     int a = 18, b = 13, r = 0;
 
 #if DEVICE_VALUE == CPU_DEVICE
@@ -16,15 +15,14 @@ int main()
     sycl::buffer<int, 1> buffer_b(&b, sycl::range{1});
     sycl::buffer<int, 1> buffer_r(&r, sycl::range{1});
 
-    q.submit([&](sycl::handler &cgh)
-             {
-        sycl::accessor accessor_a{buffer_a, cgh, sycl::read_only};
-        sycl::accessor accessor_b{buffer_b, cgh, sycl::read_only};
-        sycl::accessor accessor_r{buffer_r, cgh, sycl::write_only, sycl::no_init};
+    q.submit([&](sycl::handler &cgh) {
+        sycl::accessor acce_a{buffer_a, cgh, sycl::read_only};
+        sycl::accessor acce_b{buffer_b, cgh, sycl::read_only};
+        sycl::accessor acce_r{buffer_r, cgh, sycl::write_only};
 
         cgh.single_task(
             [=]
-            { accessor_r[0] = accessor_a[0] + accessor_b[0]; }); })
+            { acce_r[0] = acce_a[0] + acce_b[0]; }); })
         .wait();
 
     std::cout << "Result: " << r << std::endl;
