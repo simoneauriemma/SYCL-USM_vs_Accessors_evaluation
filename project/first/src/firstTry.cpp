@@ -6,7 +6,7 @@ void print_matrix(int, int, float *, std::string);
 int main() {
   // Settings
   constexpr uint N = 1024;
-  constexpr uint B = 1;
+  constexpr uint B = 16;
 
   // Variables declaration
   float *matrix_a = (float *)malloc(sizeof(float) * N * N);
@@ -35,6 +35,8 @@ int main() {
     sycl::buffer<float, 2> buffer_b(matrix_b, sycl::range<2>{N, N});
     sycl::buffer<float, 2> buffer_r(matrix_c, sycl::range<2>{N, N});
 
+    std::cout << "Execution on this device: " << q.get_device().get_info<sycl::info::device::name>() << "\n";
+
     // Queue
     q.submit([&](sycl::handler &cgh) {
       sycl::accessor<float, 2> acce_a{buffer_a, cgh, sycl::read_only};
@@ -42,11 +44,6 @@ int main() {
       sycl::accessor<float, 2> acce_r{buffer_r, cgh, sycl::write_only, sycl::no_init};
 
       start = std::chrono::steady_clock::now();
-      // Questo non so cos'è però era già qui e l'ho lasciato
-      // cgh.parallel_for(sycl::range<2>({N, N}), [=](sycl::id<2> idx) {
-      //   const size_t r = idx.get_global_id(0);
-      //   const size_t c = idx.get_global_id(1);
-      // });
 
       cgh.parallel_for(sycl::nd_range<2>{{N, N}, {B, B}}, [=](sycl::nd_item<2> idx) {
         const size_t r = idx.get_global_id(0);
@@ -69,12 +66,13 @@ int main() {
 
   std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
-
   std::cout << "Time in seconds : " << elapsed_seconds.count() << std::endl;
 
-  // print_matrix(N, N, matrix_a, "MATRICE A");
-  // print_matrix(N, N, matrix_b, "MATRICE B");
-  // print_matrix(N, N, matrix_c, "MATRICE C");
+  if (N < 10) {
+    print_matrix(N, N, matrix_a, "MATRICE A");
+    print_matrix(N, N, matrix_b, "MATRICE B");
+    print_matrix(N, N, matrix_c, "MATRICE C");
+  }
 
   free(matrix_a);
   free(matrix_b);
@@ -94,12 +92,17 @@ void print_matrix(int rows_size, int columns_size, float *matrix, std::string ma
 
   std::cout << std::endl << matrix_name << std::endl;
   for (i = 0; i < rows_size * columns_size; i++) {
-    // printf("| ");
-    // std::cout << "| " << *(matrix + i) << " ";
-    std::cout << *(matrix + i) << " ";
+    if (rows_size < 10) {
+      printf("| ");
+      std::cout << "| " << *(matrix + i) << " ";
+    } else {
+      std::cout << *(matrix + i) << " ";
+    }
 
-    // if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " <<
-    // std::endl;
-    if ((i + 1) % columns_size == 0 && i != 0) std::cout << std::endl;
+    if (rows_size < 10) {
+      if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " << std::endl;
+    } else {
+      if ((i + 1) % columns_size == 0 && i != 0) std::cout << std::endl;
+    }
   }
 }

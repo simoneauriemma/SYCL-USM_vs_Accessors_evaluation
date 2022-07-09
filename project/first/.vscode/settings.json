@@ -1,7 +1,8 @@
 {
   "cmake.configureArgs": [
     "-DSYCL_BACKEND=hipSYCL",
-    "-DSYCL_DEVICE=gpu"
+    "-DSYCL_DEVICE=gpu",
+    "-DCMAKE_CXX_FLAGS='-O3'"
   ],
   "files.associations": {
     "array": "cpp",
