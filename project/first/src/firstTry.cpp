@@ -5,8 +5,8 @@ void print_matrix(int, int, float *, std::string);
 
 int main() {
   // Settings
-  constexpr uint N = 12;
-  constexpr uint B = 4;
+  constexpr uint N = 1024;
+  constexpr uint B = 1;
 
   // Variables declaration
   float *matrix_a = (float *)malloc(sizeof(float) * N * N);
@@ -17,6 +17,8 @@ int main() {
   init_matrix(N, N, matrix_a);
   init_matrix(N, N, matrix_b);
   memset(matrix_c, 0, sizeof(float) * N * N);
+
+  std::chrono::_V2::steady_clock::time_point start;
 
   // Device selector
   try {
@@ -39,6 +41,7 @@ int main() {
       sycl::accessor<float, 2> acce_b{buffer_b, cgh, sycl::read_only};
       sycl::accessor<float, 2> acce_r{buffer_r, cgh, sycl::write_only, sycl::no_init};
 
+      start = std::chrono::steady_clock::now();
       // Questo non so cos'è però era già qui e l'ho lasciato
       // cgh.parallel_for(sycl::range<2>({N, N}), [=](sycl::id<2> idx) {
       //   const size_t r = idx.get_global_id(0);
@@ -58,14 +61,20 @@ int main() {
       });
     });
 
-    // q.wait();
+    q.wait();
+
   } catch (const sycl::exception &e) {
     std::cout << "Exception caught: " << e.what() << std::endl;
   }
 
-  print_matrix(N, N, matrix_a, "MATRICE A");
-  print_matrix(N, N, matrix_b, "MATRICE B");
-  print_matrix(N, N, matrix_c, "MATRICE C");
+  std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end - start;
+
+  std::cout << "Time in seconds : " << elapsed_seconds.count() << std::endl;
+
+  // print_matrix(N, N, matrix_a, "MATRICE A");
+  // print_matrix(N, N, matrix_b, "MATRICE B");
+  // print_matrix(N, N, matrix_c, "MATRICE C");
 
   free(matrix_a);
   free(matrix_b);
@@ -89,7 +98,8 @@ void print_matrix(int rows_size, int columns_size, float *matrix, std::string ma
     // std::cout << "| " << *(matrix + i) << " ";
     std::cout << *(matrix + i) << " ";
 
-    // if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " << std::endl;
+    // if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " <<
+    // std::endl;
     if ((i + 1) % columns_size == 0 && i != 0) std::cout << std::endl;
   }
 }
