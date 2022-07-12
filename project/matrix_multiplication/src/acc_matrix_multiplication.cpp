@@ -1,5 +1,7 @@
 #include <include.hpp>
 
+#define DEBUG
+
 void init_matrix(int, int, float *);
 void print_matrix(int, int, float *, std::string);
 void sequential_matrix_multiplication(int, int, float *, float *, float *);
@@ -7,8 +9,8 @@ int check_is_correct(int, int, float *, float *);
 
 int main() {
   // Settings
-  constexpr uint N = 1024;
-  constexpr uint B = 16;
+  constexpr uint N = 5;
+  constexpr uint B = 1;
 
   // Variables declaration
   float *matrix_a = (float *)malloc(sizeof(float) * N * N);
@@ -24,71 +26,77 @@ int main() {
   memset(matrix_c, 0, sizeof(float) * N * N);
   memset(matrix_sequential, 0, sizeof(float) * N * N);
 
-  // Start timer
+  // Timer
   std::chrono::_V2::steady_clock::time_point start;
+  std::chrono::_V2::steady_clock::time_point end;
+  std::chrono::duration<double> elapsed_seconds;
 
-  // Device selector
   try {
+    // Device selector
 #if DEVICE_VALUE == CPU_DEVICE
-    sycl::queue q{sycl::cpu_selector()};
+    sycl::queue queue{sycl::cpu_selector()};
 #elif DEVICE_VALUE == GPU_DEVICE
-    sycl::queue q{sycl::gpu_selector()};
+    sycl::queue queue{sycl::gpu_selector()};
 #elif DEVICE_VALUE == HOST_DEVICE
-    sycl::queue q{sycl::host_selector()};
+    sycl::queue queue{sycl::host_selector()};
 #endif
+
+    std::cout << "- Execution on " << queue.get_device().get_info<sycl::info::device::name>() << "\n";
 
     // Buffers
     sycl::buffer<float, 2> buffer_a(matrix_a, sycl::range<2>{N, N});
     sycl::buffer<float, 2> buffer_b(matrix_b, sycl::range<2>{N, N});
     sycl::buffer<float, 2> buffer_r(matrix_c, sycl::range<2>{N, N});
 
-    std::cout << "Execution on this device: " << q.get_device().get_info<sycl::info::device::name>() << "\n";
-
     // Queue
-    q.submit([&](sycl::handler &cgh) {
-      sycl::accessor<float, 2> acce_a{buffer_a, cgh, sycl::read_only};
-      sycl::accessor<float, 2> acce_b{buffer_b, cgh, sycl::read_only};
-      sycl::accessor<float, 2> acce_r{buffer_r, cgh, sycl::write_only, sycl::no_init};
+    queue
+        .submit([&](sycl::handler &cgh) {
+          sycl::accessor<float, 2> accessor_a{buffer_a, cgh, sycl::read_only};
+          sycl::accessor<float, 2> accessor_b{buffer_b, cgh, sycl::read_only};
+          sycl::accessor<float, 2> accessor_r{buffer_r, cgh, sycl::write_only, sycl::no_init};
 
-      start = std::chrono::steady_clock::now();
+          // Start timer
+          start = std::chrono::steady_clock::now();
 
-      cgh.parallel_for(sycl::nd_range<2>{{N, N}, {B, B}}, [=](sycl::nd_item<2> idx) {
-        const size_t r = idx.get_global_id(0);
-        const size_t c = idx.get_global_id(1);
+          cgh.parallel_for(sycl::nd_range<2>{{N, N}, {B, B}}, [=](sycl::nd_item<2> idx) {
+            const size_t r = idx.get_global_id(0);
+            const size_t c = idx.get_global_id(1);
 
-        float sum = 0.f;
-        for (uint k = 0; k < N; k++) {
-          sum += acce_a[r][k] * acce_b[k][c];
-        }
+            float sum = 0.f;
+            for (uint k = 0; k < N; k++) {
+              sum += accessor_a[r][k] * accessor_b[k][c];
+            }
 
-        acce_r[r][c] = sum;
-      });
-    });
-
-    q.wait();
+            accessor_r[r][c] = sum;
+          });
+        })
+        .wait();
 
   } catch (const sycl::exception &e) {
     std::cout << "Exception caught: " << e.what() << std::endl;
   }
 
   // Get execution time
-  std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end - start;
-  std::cout << "Time in seconds : " << elapsed_seconds.count() << std::endl;
+  end = std::chrono::steady_clock::now();
+  elapsed_seconds = end - start;
+  std::cout << "- Parallel time in seconds: " << elapsed_seconds.count() << std::endl;
 
   // Sequential matrix multiplication (for test)
-  std::cout << "Doing sequential execution..." << std::endl;
+  std::cout << std::endl << "- Doing sequential execution..." << std::endl;
   sequential_matrix_multiplication(N, N, matrix_a, matrix_b, matrix_sequential);
+  std::cout << "- Sequential execution done" << std::endl;
+
+  // Check if is correct
   res = check_is_correct(N, N, matrix_c, matrix_sequential);
 
-  if (N < 10) {
-    print_matrix(N, N, matrix_a, "MATRICE A");
-    print_matrix(N, N, matrix_b, "MATRICE B");
-    print_matrix(N, N, matrix_c, "MATRICE C");
-    print_matrix(N, N, matrix_sequential, "MATRICE SEQUENZIALE");
-  }
+#ifdef DEBUG
+  print_matrix(N, N, matrix_a, "MATRICE A");
+  print_matrix(N, N, matrix_b, "MATRICE B");
+  print_matrix(N, N, matrix_c, "MATRICE C");
+  print_matrix(N, N, matrix_sequential, "MATRICE SEQUENZIALE");
+#endif
 
-  std::cout << "RESULT: " << ((res == 1) ? "CORRECT" : "INCORRECT!") << std::endl;
+  std::cout << std::endl << "RESULT: " << ((res == 1) ? "CORRECT" : "INCORRECT!") << std::endl;
 
   free(matrix_a);
   free(matrix_b);
@@ -109,17 +117,11 @@ void print_matrix(int rows_size, int columns_size, float *matrix, std::string ma
 
   std::cout << std::endl << matrix_name << std::endl;
   for (i = 0; i < rows_size * columns_size; i++) {
-    if (rows_size < 10) {
-      std::cout << "| " << *(matrix + i) << " ";
-    } else {
-      std::cout << *(matrix + i) << " ";
-    }
+#ifdef DEBUG
+    std::cout << "| " << *(matrix + i) << " ";
 
-    if (rows_size < 10) {
-      if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " << std::endl;
-    } else {
-      if ((i + 1) % columns_size == 0 && i != 0) std::cout << std::endl;
-    }
+    if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " << std::endl;
+#endif
   }
 }
 

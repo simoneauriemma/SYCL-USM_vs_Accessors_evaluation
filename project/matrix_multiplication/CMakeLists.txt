@@ -1,21 +1,21 @@
 project(project)
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
-add_executable(firstTry)
+add_executable(acc_matrix_multiplication)
 
 option(SYCL_BACKEND "Enable selected SYCL backend" "")
 option(SYCL_DEVICE "Select target SYCL device" GPU)
 
-target_include_directories(firstTry
+target_include_directories(acc_matrix_multiplication
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_sources(firstTry PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/src/firstTry.cpp
+target_sources(acc_matrix_multiplication PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src/acc_matrix_multiplication.cpp
 )
 
-set_target_properties(firstTry PROPERTIES
+set_target_properties(acc_matrix_multiplication PROPERTIES
 	PUBLIC_HEADER
 	${CMAKE_CURRENT_SOURCE_DIR}/include/include.hpp
 )
@@ -37,7 +37,7 @@ else()
 	message(FATAL_ERROR "Unknown device selected: ${SYCL_DEVICE}" )
 endif()
 
-add_compile_definitions(firstTry
+add_compile_definitions(acc_matrix_multiplication
 	CPU_DEVICE=${CPU_DEVICE}
 	GPU_DEVICE=${GPU_DEVICE}
 	HOST_DEVICE=${HOST_DEVICE}
@@ -46,7 +46,7 @@ add_compile_definitions(firstTry
 
 if(SYCL_BACKEND STREQUAL hipSYCL)
 	find_package(hipSYCL REQUIRED)
-	add_sycl_to_target(TARGET firstTry)
+	add_sycl_to_target(TARGET acc_matrix_multiplication)
 endif()
 
 message(STATUS "SYCL_BACKEND: ${SYCL_BACKEND}")
