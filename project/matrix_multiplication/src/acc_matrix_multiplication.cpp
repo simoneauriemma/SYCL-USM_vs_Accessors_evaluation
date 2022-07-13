@@ -26,7 +26,7 @@ int main() {
   memset(matrix_c, 0, sizeof(float) * N * N);
   memset(matrix_sequential, 0, sizeof(float) * N * N);
 
-  // Timer
+  // Timers
   std::chrono::_V2::steady_clock::time_point start;
   std::chrono::_V2::steady_clock::time_point end;
   std::chrono::duration<double> elapsed_seconds;
