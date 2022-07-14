@@ -1,8 +1,8 @@
 #include <include.hpp>
 
 // Size of the matrices
-constexpr size_t N = 2000;
-constexpr size_t M = 3000;
+constexpr size_t N = 5;
+constexpr size_t M = 5;
 
 int main() {
 
@@ -23,15 +23,13 @@ int main() {
     sycl::queue queue{sycl::host_selector()};
 #endif
 
-    // Create some 2D buffers of float for our matrices
+    // Gpu Variables delcaration
     float *gpu_matrix_a = sycl::malloc_device<float>(N * M, queue);
     float *gpu_matrix_b = sycl::malloc_device<float>(N * M, queue);
     float *gpu_matrix_c = sycl::malloc_device<float>(N * M, queue);
 
     // Initialize a
     queue.submit([&](sycl::handler &cgh) {
-      // The kernel writes a, so get a write accessor on it
-      // Enqueue a parallel kernel iterating on a N*M 2D iteration space
       cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
@@ -39,7 +37,7 @@ int main() {
       });
     });
 
-    // Launch an asynchronous kernel to initialize b
+    // Initialize b
     queue.submit([&](sycl::handler &cgh) {
       cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
@@ -48,34 +46,35 @@ int main() {
       });
     });
 
-    // Launch an asynchronous kernel to compute matrix addition c = a + b
-    queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
-        const size_t r = item.get_global_id(0);
-        const size_t c = item.get_global_id(1);
-        gpu_matrix_c[r * N + c] = gpu_matrix_a[r * N + c] + gpu_matrix_b[r * N + c];
-      });
-    });
+    // Compute c
+    queue
+        .submit([&](sycl::handler &cgh) {
+          cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+            const size_t r = item.get_global_id(0);
+            const size_t c = item.get_global_id(1);
+            gpu_matrix_c[r * N + c] = gpu_matrix_a[r * N + c] + gpu_matrix_b[r * N + c];
+          });
+        })
+        .wait();
 
-    queue.wait_and_throw();
     queue.memcpy(matrix_from_gpu, gpu_matrix_c, sizeof(float) * N * M).wait();
 
-    // Ask for an accessor to read c from application scope. The SYCL runtime
-    // waits for c to be ready before returning from the constructor
+    sycl::free(gpu_matrix_a, queue);
+    sycl::free(gpu_matrix_b, queue);
+    sycl::free(gpu_matrix_c, queue);
 
-    // std::cout << std::endl << "Result:" << std::endl;
-    // for (size_t i = 0; i < N; i++) {
-    //   for (size_t j = 0; j < M; j++) {
-    //     if (C[i][j] != i * (2 + 2014) + j * (1 + 42)) {
-    //       std::cout << "Wrong value " << C[i][j] << " on element " << i << " " << j << std::endl;
-    //       exit(-1);
-    //     }
-    //   }
-    // }
   } catch (const sycl::exception &e) {
     std::cout << "Exception caught: " << e.what() << std::endl;
   }
 
-  std::cout << "Good computation!" << std::endl;
+  std::cout << std::endl << "Result:" << std::endl;
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < M; j++) {
+      std::cout << matrix_from_gpu[i * N + j] << " ";
+
+      if ((j + 1) % M == 0) std::cout << std::endl;
+    }
+  }
+
   return 0;
 }
