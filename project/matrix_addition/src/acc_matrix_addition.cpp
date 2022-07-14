@@ -35,24 +35,16 @@ int main() {
 
     // Launch an asynchronous kernel to initialize b
     queue.submit([&](sycl::handler& cgh) {
-      // The kernel writes b, so get a write accessor on it
       sycl::accessor B{buffer_b, cgh, sycl::write_only, sycl::no_init};
-      // From the access pattern above, the SYCL runtime detects that this
-      // command_group is independent from the first one and can be
-      // scheduled independently
-      // Enqueue a parallel kernel iterating on a N*M 2D iteration space
       cgh.parallel_for(sycl::range<2>{N, M}, [=](sycl::id<2> index) { B[index] = index[0] * 2014 + index[1] * 42; });
     });
 
     // Launch an asynchronous kernel to compute matrix addition c = a + b
     queue.submit([&](sycl::handler& cgh) {
-      // In the kernel a and b are read, but c is written
       sycl::accessor A{buffer_a, cgh, sycl::read_only};
       sycl::accessor B{buffer_b, cgh, sycl::read_only};
       sycl::accessor C{buffer_c, cgh, sycl::write_only, sycl::no_init};
-      // From these accessors, the SYCL runtime will ensure that when
-      // this kernel is run, the kernels computing a and b have completed
-      // Enqueue a parallel kernel iterating on a N*M 2D iteration space
+
       cgh.parallel_for(sycl::range<2>{N, M}, [=](sycl::id<2> index) { C[index] = A[index] + B[index]; });
     });
 
@@ -63,7 +55,6 @@ int main() {
     std::cout << std::endl << "Result:" << std::endl;
     for (size_t i = 0; i < N; i++) {
       for (size_t j = 0; j < M; j++) {
-        // Compare the result to the analytic value
         if (C[i][j] != i * (2 + 2014) + j * (1 + 42)) {
           std::cout << "Wrong value " << C[i][j] << " on element " << i << " " << j << std::endl;
           exit(-1);
