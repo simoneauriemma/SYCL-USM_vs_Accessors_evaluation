@@ -1,21 +1,21 @@
 project(project)
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
-add_executable(usm_matrix_addition)
+add_executable(acc_matrix_addition)
 
 option(SYCL_BACKEND "Enable selected SYCL backend" "")
 option(SYCL_DEVICE "Select target SYCL device" GPU)
 
-target_include_directories(usm_matrix_addition
+target_include_directories(acc_matrix_addition
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_sources(usm_matrix_addition PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/src/usm_matrix_addition.cpp
+target_sources(acc_matrix_addition PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src/acc_matrix_addition.cpp
 )
 
-set_target_properties(usm_matrix_addition PROPERTIES
+set_target_properties(acc_matrix_addition PROPERTIES
 	PUBLIC_HEADER
 	${CMAKE_CURRENT_SOURCE_DIR}/include/include.hpp
 )
@@ -37,7 +37,7 @@ else()
 	message(FATAL_ERROR "Unknown device selected: ${SYCL_DEVICE}" )
 endif()
 
-add_compile_definitions(usm_matrix_addition
+add_compile_definitions(acc_matrix_addition
 	CPU_DEVICE=${CPU_DEVICE}
 	GPU_DEVICE=${GPU_DEVICE}
 	HOST_DEVICE=${HOST_DEVICE}
@@ -46,7 +46,7 @@ add_compile_definitions(usm_matrix_addition
 
 if(SYCL_BACKEND STREQUAL hipSYCL)
 	find_package(hipSYCL REQUIRED)
-	add_sycl_to_target(TARGET usm_matrix_addition)
+	add_sycl_to_target(TARGET acc_matrix_addition)
 endif()
 
 message(STATUS "SYCL_BACKEND: ${SYCL_BACKEND}")
