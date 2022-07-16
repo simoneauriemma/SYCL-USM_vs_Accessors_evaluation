@@ -3,8 +3,8 @@
 // #define DEBUG
 
 // Size of the matrices
-constexpr size_t N = 5;
-constexpr size_t M = 5;
+constexpr size_t N = 4096;
+constexpr size_t M = 4096;
 
 int main() {
   // Timers
