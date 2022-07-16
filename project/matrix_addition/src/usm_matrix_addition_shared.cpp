@@ -7,10 +7,9 @@ constexpr size_t N = 4096;
 constexpr size_t M = 4096;
 
 int main() {
-
-  float *matrix_A_from_gpu = (float *)malloc(sizeof(float) * N * M);
-  float *matrix_B_from_gpu = (float *)malloc(sizeof(float) * N * M);
-  float *matrix_from_gpu = (float *)malloc(sizeof(float) * N * M);
+  float *gpu_matrix_a;
+  float *gpu_matrix_b;
+  float *gpu_matrix_c;
 
   // Timers
   std::chrono::_V2::steady_clock::time_point start;
@@ -28,9 +27,9 @@ int main() {
 #endif
 
     // Gpu Variables delcaration
-    float *gpu_matrix_a = sycl::malloc_device<float>(N * M, queue);
-    float *gpu_matrix_b = sycl::malloc_device<float>(N * M, queue);
-    float *gpu_matrix_c = sycl::malloc_device<float>(N * M, queue);
+    gpu_matrix_a = sycl::malloc_shared<float>(N * M, queue);
+    gpu_matrix_b = sycl::malloc_shared<float>(N * M, queue);
+    gpu_matrix_c = sycl::malloc_shared<float>(N * M, queue);
 
     // Start timer
     start = std::chrono::steady_clock::now();
@@ -66,15 +65,6 @@ int main() {
 
     // Get execution time
     end = std::chrono::steady_clock::now();
-
-    queue.memcpy(matrix_A_from_gpu, gpu_matrix_a, sizeof(float) * N * M).wait();
-    queue.memcpy(matrix_B_from_gpu, gpu_matrix_b, sizeof(float) * N * M).wait();
-    queue.memcpy(matrix_from_gpu, gpu_matrix_c, sizeof(float) * N * M).wait();
-
-    sycl::free(gpu_matrix_a, queue);
-    sycl::free(gpu_matrix_b, queue);
-    sycl::free(gpu_matrix_c, queue);
-
   } catch (const sycl::exception &e) {
     std::cout << "Exception caught: " << e.what() << std::endl;
   }
@@ -87,7 +77,7 @@ int main() {
   std::cout << std::endl << "Matrice A:" << std::endl;
   for (size_t i = 0; i < N; i++) {
     for (size_t j = 0; j < M; j++) {
-      std::cout << matrix_A_from_gpu[i * N + j] << " ";
+      std::cout << gpu_matrix_a[i * N + j] << " ";
 
       if ((j + 1) % M == 0) std::cout << std::endl;
     }
@@ -97,7 +87,7 @@ int main() {
   std::cout << std::endl << "Matrice B:" << std::endl;
   for (size_t i = 0; i < N; i++) {
     for (size_t j = 0; j < M; j++) {
-      std::cout << matrix_B_from_gpu[i * N + j] << " ";
+      std::cout << gpu_matrix_b[i * N + j] << " ";
 
       if ((j + 1) % M == 0) std::cout << std::endl;
     }
@@ -107,16 +97,12 @@ int main() {
   std::cout << std::endl << "Result:" << std::endl;
   for (size_t i = 0; i < N; i++) {
     for (size_t j = 0; j < M; j++) {
-      std::cout << matrix_from_gpu[i * N + j] << " ";
+      std::cout << gpu_matrix_c[i * N + j] << " ";
 
       if ((j + 1) % M == 0) std::cout << std::endl;
     }
   }
 #endif
-
-  free(matrix_A_from_gpu);
-  free(matrix_B_from_gpu);
-  free(matrix_from_gpu);
 
   return 0;
 }

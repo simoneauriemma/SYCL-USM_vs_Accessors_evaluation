@@ -1,5 +1,7 @@
 #include <include.hpp>
 
+// #define DEBUG
+
 // Size of the matrices
 constexpr size_t N = 5;
 constexpr size_t M = 5;
@@ -60,6 +62,7 @@ int main() {
     sycl::host_accessor B{buffer_b, sycl::read_only};
     sycl::host_accessor C{buffer_c, sycl::read_only};
 
+#ifdef DEBUG
     // Matrice A
     std::cout << std::endl << "Matrice A:" << std::endl;
     for (size_t i = 0; i < N; i++) {
@@ -95,6 +98,8 @@ int main() {
         }
       }
     }
+#endif
+
   } catch (const sycl::exception& e) {
     std::cout << "Exception caught: " << e.what() << std::endl;
   }

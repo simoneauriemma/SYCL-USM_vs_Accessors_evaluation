@@ -1,6 +1,6 @@
 #include <include.hpp>
 
-#define DEBUG
+// #define DEBUG
 
 void init_matrix(int, int, float *);
 void print_matrix(int, int, float *, std::string);
@@ -9,8 +9,8 @@ int check_is_correct(int, int, float *, float *);
 
 int main() {
   // Settings
-  constexpr uint N = 5;
-  constexpr uint B = 1;
+  constexpr uint N = 4096;
+  constexpr uint B = 128;
 
   // Variables declaration
   float *matrix_a = (float *)malloc(sizeof(float) * N * N);
@@ -40,7 +40,7 @@ int main() {
     sycl::queue queue{sycl::host_selector()};
 #endif
 
-    std::cout << "- Execution on " << queue.get_device().get_info<sycl::info::device::name>() << "\n";
+    // std::cout << "- Execution on " << queue.get_device().get_info<sycl::info::device::name>() << "\n";
 
     // Delcaration of GPU Matrix
     float *gpu_matrix_a = sycl::malloc_device<float>(N * N, queue);
@@ -86,13 +86,13 @@ int main() {
   elapsed_seconds = end - start;
   std::cout << "- Parallel time in seconds: " << elapsed_seconds.count() << std::endl;
 
-  // Sequential matrix multiplication (for test)
-  std::cout << std::endl << "- Doing sequential execution..." << std::endl;
-  sequential_matrix_multiplication(N, N, matrix_a, matrix_b, matrix_sequential);
-  std::cout << "- Sequential execution done" << std::endl;
+  // // Sequential matrix multiplication (for test)
+  // std::cout << std::endl << "- Doing sequential execution..." << std::endl;
+  // sequential_matrix_multiplication(N, N, matrix_a, matrix_b, matrix_sequential);
+  // std::cout << "- Sequential execution done" << std::endl;
 
-  // Check if is correct
-  res = check_is_correct(N, N, matrix_from_gpu, matrix_sequential);
+  // // Check if is correct
+  // res = check_is_correct(N, N, matrix_from_gpu, matrix_sequential);
 
 #ifdef DEBUG
   print_matrix(N, N, matrix_a, "MATRICE A");
@@ -101,7 +101,7 @@ int main() {
   print_matrix(N, N, matrix_sequential, "MATRICE SEQUENZIALE");
 #endif
 
-  std::cout << std::endl << "RESULT: " << ((res == 1) ? "CORRECT" : "INCORRECT!") << std::endl;
+  // std::cout << std::endl << "RESULT: " << ((res == 1) ? "CORRECT" : "INCORRECT!") << std::endl;
 
   free(matrix_a);
   free(matrix_b);
