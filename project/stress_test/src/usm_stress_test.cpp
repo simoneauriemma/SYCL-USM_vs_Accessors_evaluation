@@ -68,38 +68,6 @@ int main() {
   float var30_fromGpu;
   float var31_fromGpu;
 
-  float var1_Gpu;
-  float var2_Gpu;
-  float var3_Gpu;
-  float var4_Gpu;
-  float var5_Gpu;
-  float var6_Gpu;
-  float var7_Gpu;
-  float var8_Gpu;
-  float var9_Gpu;
-  float var10_Gpu;
-  float var11_Gpu;
-  float var12_Gpu;
-  float var13_Gpu;
-  float var14_Gpu;
-  float var15_Gpu;
-  float var16_Gpu;
-  float var17_Gpu;
-  float var18_Gpu;
-  float var19_Gpu;
-  float var20_Gpu;
-  float var21_Gpu;
-  float var22_Gpu;
-  float var23_Gpu;
-  float var24_Gpu;
-  float var25_Gpu;
-  float var26_Gpu;
-  float var27_Gpu;
-  float var28_Gpu;
-  float var29_Gpu;
-  float var30_Gpu;
-  float var31_Gpu;
-
   // Timers
   std::chrono::_V2::steady_clock::time_point start;
   std::chrono::_V2::steady_clock::time_point end;
@@ -114,6 +82,38 @@ int main() {
 #elif DEVICE_VALUE == HOST_DEVICE
     sycl::queue queue{sycl::host_selector()};
 #endif
+
+    float var1_Gpu;
+    float var2_Gpu;
+    float var3_Gpu;
+    float var4_Gpu;
+    float var5_Gpu;
+    float var6_Gpu;
+    float var7_Gpu;
+    float var8_Gpu;
+    float var9_Gpu;
+    float var10_Gpu;
+    float var11_Gpu;
+    float var12_Gpu;
+    float var13_Gpu;
+    float var14_Gpu;
+    float var15_Gpu;
+    float var16_Gpu;
+    float var17_Gpu;
+    float var18_Gpu;
+    float var19_Gpu;
+    float var20_Gpu;
+    float var21_Gpu;
+    float var22_Gpu;
+    float var23_Gpu;
+    float var24_Gpu;
+    float var25_Gpu;
+    float var26_Gpu;
+    float var27_Gpu;
+    float var28_Gpu;
+    float var29_Gpu;
+    float var30_Gpu;
+    float var31_Gpu;
 
     // std::cout << "- Execution on " << queue.get_device().get_info<sycl::info::device::name>() << "\n";
 
