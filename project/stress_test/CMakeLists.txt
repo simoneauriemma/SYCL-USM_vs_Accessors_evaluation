@@ -1,21 +1,21 @@
 project(project)
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
-add_executable(acc_stress_test)
+add_executable(usm_stress_test)
 
 option(SYCL_BACKEND "Enable selected SYCL backend" "")
 option(SYCL_DEVICE "Select target SYCL device" GPU)
 
-target_include_directories(acc_stress_test
+target_include_directories(usm_stress_test
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_sources(acc_stress_test PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/src/acc_stress_test.cpp
+target_sources(usm_stress_test PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src/usm_stress_test.cpp
 )
 
-set_target_properties(acc_stress_test PROPERTIES
+set_target_properties(usm_stress_test PROPERTIES
 	PUBLIC_HEADER
 	${CMAKE_CURRENT_SOURCE_DIR}/include/include.hpp
 )
@@ -37,7 +37,7 @@ else()
 	message(FATAL_ERROR "Unknown device selected: ${SYCL_DEVICE}" )
 endif()
 
-add_compile_definitions(acc_stress_test
+add_compile_definitions(usm_stress_test
 	CPU_DEVICE=${CPU_DEVICE}
 	GPU_DEVICE=${GPU_DEVICE}
 	HOST_DEVICE=${HOST_DEVICE}
@@ -46,7 +46,7 @@ add_compile_definitions(acc_stress_test
 
 if(SYCL_BACKEND STREQUAL hipSYCL)
 	find_package(hipSYCL REQUIRED)
-	add_sycl_to_target(TARGET acc_stress_test)
+	add_sycl_to_target(TARGET usm_stress_test)
 endif()
 
 message(STATUS "SYCL_BACKEND: ${SYCL_BACKEND}")

@@ -130,7 +130,7 @@ int main() {
           start = std::chrono::steady_clock::now();
 
           cgh.parallel_for(sycl::range<1>(31), [=](sycl::id<1> idx) {
-            accessor_1[0] = 10.0;
+            accessor_1[0] = 10;
             accessor_2[0] = 10;
             accessor_3[0] = 10;
             accessor_4[0] = 10;
@@ -161,7 +161,40 @@ int main() {
             accessor_29[0] = 10;
             accessor_30[0] = 10;
             accessor_31[0] = 10;
-            out << "Hello stream! " << idx << sycl::flush;
+
+            accessor_1[0] += accessor_31[0] * accessor_1[0];
+            accessor_2[0] += accessor_30[0] * accessor_2[0];
+            accessor_3[0] += accessor_29[0] * accessor_3[0];
+            accessor_4[0] += accessor_28[0] * accessor_4[0];
+            accessor_5[0] += accessor_27[0] * accessor_5[0];
+            accessor_6[0] += accessor_26[0] * accessor_6[0];
+            accessor_7[0] += accessor_25[0] * accessor_7[0];
+            accessor_8[0] += accessor_24[0] * accessor_8[0];
+            accessor_9[0] += accessor_23[0] * accessor_9[0];
+            accessor_10[0] += accessor_22[0] * accessor_10[0];
+            accessor_11[0] += accessor_21[0] * accessor_11[0];
+            accessor_12[0] += accessor_20[0] * accessor_12[0];
+            accessor_13[0] += accessor_19[0] * accessor_13[0];
+            accessor_14[0] += accessor_18[0] * accessor_14[0];
+            accessor_15[0] += accessor_17[0] * accessor_15[0];
+            accessor_16[0] += accessor_16[0] * accessor_16[0];
+            accessor_17[0] += accessor_15[0] * accessor_17[0];
+            accessor_18[0] += accessor_14[0] * accessor_18[0];
+            accessor_19[0] += accessor_13[0] * accessor_19[0];
+            accessor_20[0] += accessor_12[0] * accessor_20[0];
+            accessor_21[0] += accessor_11[0] * accessor_21[0];
+            accessor_22[0] += accessor_10[0] * accessor_22[0];
+            accessor_23[0] += accessor_9[0] * accessor_23[0];
+            accessor_24[0] += accessor_8[0] * accessor_24[0];
+            accessor_25[0] += accessor_7[0] * accessor_25[0];
+            accessor_26[0] += accessor_6[0] * accessor_26[0];
+            accessor_27[0] += accessor_5[0] * accessor_27[0];
+            accessor_28[0] += accessor_4[0] * accessor_28[0];
+            accessor_29[0] += accessor_3[0] * accessor_29[0];
+            accessor_30[0] += accessor_2[0] * accessor_30[0];
+            accessor_31[0] += accessor_1[0] * accessor_31[0];
+
+            // out << "Hello stream! " << idx << sycl::flush;
           });
         })
         .wait();
