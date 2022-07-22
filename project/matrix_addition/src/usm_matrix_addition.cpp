@@ -37,7 +37,7 @@ int main() {
 
     // Initialize a
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Init1>(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
         gpu_matrix_a[r * N + c] = r + c;
@@ -46,7 +46,7 @@ int main() {
 
     // Initialize b
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Init2>(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
         gpu_matrix_b[r * N + c] = r + c;
@@ -55,7 +55,7 @@ int main() {
 
     // Compute c
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Compute>(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
         gpu_matrix_c[r * N + c] = gpu_matrix_a[r * N + c] + gpu_matrix_b[r * N + c];
