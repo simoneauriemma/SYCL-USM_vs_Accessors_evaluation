@@ -1,2 +1,2 @@
 add_sycl_executable(acc_matrix_multiplication acc_matrix_multiplication.cpp)
-add_sycl_executable(usm_matrix_multiplication acc_matrix_multiplication.cpp)
+add_sycl_executable(usm_matrix_multiplication usm_matrix_multiplication.cpp)
