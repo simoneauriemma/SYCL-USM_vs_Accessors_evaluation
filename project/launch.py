@@ -5,11 +5,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 programs = [
-    "./matrix_addition/build/acc_matrix_addition",
-    "./matrix_addition/build/usm_matrix_addition",
-    "./matrix_addition/build/usm_matrix_addition_shared",
-    "./matrix_multiplication/build/acc_matrix_multiplication",
-    "./matrix_multiplication/build/usm_matrix_multiplication",
+    "./build/matrix_addition/acc_matrix_addition",
+    "./build/matrix_addition/usm_matrix_addition",
+    "./build/matrix_addition/usm_matrix_addition_shared",
+
+    "./build/matrix_multiplication/acc_matrix_multiplication",
+    "./build/matrix_multiplication/usm_matrix_multiplication",
+    
+    "./build/stress_test/usm_stress_test",
+    "./build/stress_test/acc_stress_test",
 ]
 times = []
 

@@ -1,2 +1,3 @@
 add_sycl_executable(acc_matrix_addition acc_matrix_addition.cpp)
 add_sycl_executable(usm_matrix_addition usm_matrix_addition.cpp)
+add_sycl_executable(usm_matrix_addition_shared usm_matrix_addition_shared.cpp)

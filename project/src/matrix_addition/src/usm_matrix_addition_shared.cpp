@@ -3,8 +3,9 @@
 // #define DEBUG
 
 // Size of the matrices
-constexpr size_t N = 4096;
-constexpr size_t M = 4096;
+constexpr size_t ROWS = 4096;
+constexpr size_t COLUMNS = 4096;
+constexpr size_t WORK_GROUP_SIZE = 64;
 
 int main() {
   float *gpu_matrix_a;
@@ -27,37 +28,37 @@ int main() {
 #endif
 
     // Gpu Variables delcaration
-    gpu_matrix_a = sycl::malloc_shared<float>(N * M, queue);
-    gpu_matrix_b = sycl::malloc_shared<float>(N * M, queue);
-    gpu_matrix_c = sycl::malloc_shared<float>(N * M, queue);
+    gpu_matrix_a = sycl::malloc_shared<float>(ROWS * COLUMNS, queue);
+    gpu_matrix_b = sycl::malloc_shared<float>(ROWS * COLUMNS, queue);
+    gpu_matrix_c = sycl::malloc_shared<float>(ROWS * COLUMNS, queue);
 
     // Start timer
     start = std::chrono::steady_clock::now();
 
     // Initialize a
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
-        gpu_matrix_a[r * N + c] = r + c;
+        gpu_matrix_a[r * ROWS + c] = r + c;
       });
     });
 
     // Initialize b
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
-        gpu_matrix_b[r * N + c] = r + c;
+        gpu_matrix_b[r * ROWS + c] = r + c;
       });
     });
 
     // Compute c
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for(sycl::nd_range<2>{{N, M}, {1, 1}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
-        gpu_matrix_c[r * N + c] = gpu_matrix_a[r * N + c] + gpu_matrix_b[r * N + c];
+        gpu_matrix_c[r * ROWS + c] = gpu_matrix_a[r * ROWS + c] + gpu_matrix_b[r * ROWS + c];
       });
     });
 
@@ -75,31 +76,31 @@ int main() {
 #ifdef DEBUG
   // Matrice A
   std::cout << std::endl << "Matrice A:" << std::endl;
-  for (size_t i = 0; i < N; i++) {
-    for (size_t j = 0; j < M; j++) {
-      std::cout << gpu_matrix_a[i * N + j] << " ";
+  for (size_t i = 0; i < ROWS; i++) {
+    for (size_t j = 0; j < COLUMNS; j++) {
+      std::cout << gpu_matrix_a[i * ROWS + j] << " ";
 
-      if ((j + 1) % M == 0) std::cout << std::endl;
+      if ((j + 1) % COLUMNS == 0) std::cout << std::endl;
     }
   }
 
   // Matrice B
   std::cout << std::endl << "Matrice B:" << std::endl;
-  for (size_t i = 0; i < N; i++) {
-    for (size_t j = 0; j < M; j++) {
-      std::cout << gpu_matrix_b[i * N + j] << " ";
+  for (size_t i = 0; i < ROWS; i++) {
+    for (size_t j = 0; j < COLUMNS; j++) {
+      std::cout << gpu_matrix_b[i * ROWS + j] << " ";
 
-      if ((j + 1) % M == 0) std::cout << std::endl;
+      if ((j + 1) % COLUMNS == 0) std::cout << std::endl;
     }
   }
 
   // Matrice Result
   std::cout << std::endl << "Result:" << std::endl;
-  for (size_t i = 0; i < N; i++) {
-    for (size_t j = 0; j < M; j++) {
-      std::cout << gpu_matrix_c[i * N + j] << " ";
+  for (size_t i = 0; i < ROWS; i++) {
+    for (size_t j = 0; j < COLUMNS; j++) {
+      std::cout << gpu_matrix_c[i * ROWS + j] << " ";
 
-      if ((j + 1) % M == 0) std::cout << std::endl;
+      if ((j + 1) % COLUMNS == 0) std::cout << std::endl;
     }
   }
 #endif

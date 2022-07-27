@@ -1,0 +1,52 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "Create qdrep file - MA",
+      "command": "nsys profile -o results/qdreps/${fileBasenameNoExtension} ./build/src/matrix_addition/${fileBasenameNoExtension}",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": [
+        "$eslint-compact"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "type": "shell",
+      "label": "Create qdrep file - MM",
+      "command": "nsys profile -o results/qdreps/${fileBasenameNoExtension} ./build/src/matrix_multiplication/${fileBasenameNoExtension}",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": [
+        "$eslint-compact"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "type": "shell",
+      "label": "Create qdrep file - ST",
+      "command": "nsys profile -o results/qdreps/${fileBasenameNoExtension} ./build/src/stress_test/${fileBasenameNoExtension}",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": [
+        "$eslint-compact"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    }
+  ]
+}
