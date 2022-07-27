@@ -7,23 +7,25 @@ void print_matrix(int, int, float *, std::string);
 void sequential_matrix_multiplication(int, int, float *, float *, float *);
 int check_is_correct(int, int, float *, float *);
 
+// Size of the matrices
+constexpr size_t ROWS = 2048;
+constexpr size_t COLUMNS = 2048;
+constexpr size_t WORK_GROUP_SIZE = 32;
+
 int main() {
-  // Settings
-  constexpr uint N = 4096;
-  constexpr uint B = 128;
 
   // Variables declaration
-  float *matrix_a = (float *)malloc(sizeof(float) * N * N);
-  float *matrix_b = (float *)malloc(sizeof(float) * N * N);
-  float *matrix_from_gpu = (float *)malloc(sizeof(float) * N * N);
-  float *matrix_sequential = (float *)malloc(sizeof(float) * N * N);
+  float *matrix_a = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
+  float *matrix_b = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
+  float *matrix_from_gpu = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
+  float *matrix_sequential = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
 
   int res = 0;
 
   // Init
-  init_matrix(N, N, matrix_a);
-  init_matrix(N, N, matrix_b);
-  memset(matrix_sequential, 0, sizeof(float) * N * N);
+  init_matrix(ROWS, COLUMNS, matrix_a);
+  init_matrix(ROWS, COLUMNS, matrix_b);
+  memset(matrix_sequential, 0, sizeof(float) * ROWS * COLUMNS);
 
   // Timers
   std::chrono::_V2::steady_clock::time_point start;
@@ -43,12 +45,12 @@ int main() {
     // std::cout << "- Execution on " << queue.get_device().get_info<sycl::info::device::name>() << "\n";
 
     // Delcaration of GPU Matrix
-    float *gpu_matrix_a = sycl::malloc_device<float>(N * N, queue);
-    float *gpu_matrix_b = sycl::malloc_device<float>(N * N, queue);
-    float *gpu_matrix_r = sycl::malloc_device<float>(N * N, queue);
+    float *gpu_matrix_a = sycl::malloc_device<float>(ROWS * COLUMNS, queue);
+    float *gpu_matrix_b = sycl::malloc_device<float>(ROWS * COLUMNS, queue);
+    float *gpu_matrix_r = sycl::malloc_device<float>(ROWS * COLUMNS, queue);
 
-    queue.memcpy(gpu_matrix_a, matrix_a, sizeof(float) * N * N);
-    queue.memcpy(gpu_matrix_b, matrix_b, sizeof(float) * N * N);
+    queue.memcpy(gpu_matrix_a, matrix_a, sizeof(float) * ROWS * COLUMNS);
+    queue.memcpy(gpu_matrix_b, matrix_b, sizeof(float) * ROWS * COLUMNS);
     queue.wait();
 
     // Queue
@@ -57,21 +59,21 @@ int main() {
           // Start timer
           start = std::chrono::steady_clock::now();
 
-          cgh.parallel_for(sycl::nd_range<2>{{N, N}, {B, B}}, [=](sycl::nd_item<2> idx) {
+          cgh.parallel_for<class Compute>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> idx) {
             const size_t r = idx.get_global_id(0);
             const size_t c = idx.get_global_id(1);
 
             float sum = 0.f;
-            for (uint k = 0; k < N; k++) {
-              sum += gpu_matrix_a[r * N + k] * gpu_matrix_b[k * N + c];
+            for (uint k = 0; k < ROWS; k++) {
+              sum += gpu_matrix_a[r * ROWS + k] * gpu_matrix_b[k * ROWS + c];
             }
 
-            gpu_matrix_r[r * N + c] = sum;
+            gpu_matrix_r[r * ROWS + c] = sum;
           });
         })
         .wait();
 
-    queue.memcpy(matrix_from_gpu, gpu_matrix_r, sizeof(float) * N * N).wait();
+    queue.memcpy(matrix_from_gpu, gpu_matrix_r, sizeof(float) * ROWS * COLUMNS).wait();
 
     sycl::free(gpu_matrix_a, queue);
     sycl::free(gpu_matrix_b, queue);
@@ -86,22 +88,22 @@ int main() {
   elapsed_seconds = end - start;
   std::cout << "- Parallel time in seconds: " << elapsed_seconds.count() << std::endl;
 
-  // // Sequential matrix multiplication (for test)
-  // std::cout << std::endl << "- Doing sequential execution..." << std::endl;
-  // sequential_matrix_multiplication(N, N, matrix_a, matrix_b, matrix_sequential);
-  // std::cout << "- Sequential execution done" << std::endl;
-
-  // // Check if is correct
-  // res = check_is_correct(N, N, matrix_from_gpu, matrix_sequential);
-
 #ifdef DEBUG
-  print_matrix(N, N, matrix_a, "MATRICE A");
-  print_matrix(N, N, matrix_b, "MATRICE B");
-  print_matrix(N, N, matrix_from_gpu, "MATRICE DALLA GPU");
-  print_matrix(N, N, matrix_sequential, "MATRICE SEQUENZIALE");
-#endif
+  // Sequential matrix multiplication (for test)
+  std::cout << std::endl << "- Doing sequential execution..." << std::endl;
+  sequential_matrix_multiplication(ROWS, ROWS, matrix_a, matrix_b, matrix_sequential);
+  std::cout << "- Sequential execution done" << std::endl;
 
-  // std::cout << std::endl << "RESULT: " << ((res == 1) ? "CORRECT" : "INCORRECT!") << std::endl;
+  // Check if is correct
+  res = check_is_correct(ROWS, ROWS, matrix_from_gpu, matrix_sequential);
+
+  print_matrix(ROWS, ROWS, matrix_a, "MATRICE A");
+  print_matrix(ROWS, ROWS, matrix_b, "MATRICE B");
+  print_matrix(ROWS, ROWS, matrix_from_gpu, "MATRICE DALLA GPU");
+  print_matrix(ROWS, ROWS, matrix_sequential, "MATRICE SEQUENZIALE");
+
+  std::cout << std::endl << "RESULT: " << ((res == 1) ? "CORRECT" : "INCORRECT!") << std::endl;
+#endif
 
   free(matrix_a);
   free(matrix_b);
@@ -123,11 +125,9 @@ void print_matrix(int rows_size, int columns_size, float *matrix, std::string ma
   std::cout << std::endl << matrix_name << std::endl;
   for (i = 0; i < rows_size * columns_size; i++) {
 
-#ifdef DEBUG
     std::cout << "| " << *(matrix + i) << " ";
 
     if ((i + 1) % columns_size == 0 && i != 0) std::cout << "| " << std::endl;
-#endif
   }
 }
 

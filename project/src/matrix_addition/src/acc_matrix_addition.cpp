@@ -35,7 +35,7 @@ int main() {
     queue.submit([&](sycl::handler& cgh) {
       sycl::accessor<float, 2> A{buffer_a, cgh, sycl::write_only, sycl::no_init};
 
-      cgh.parallel_for<class Init1>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Init_A>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
 
@@ -46,10 +46,10 @@ int main() {
       });
     });
 
-    // Launch an asynchronous kernel to initialize b
+    // Initialize b
     queue.submit([&](sycl::handler& cgh) {
       sycl::accessor<float, 2> B{buffer_b, cgh, sycl::write_only, sycl::no_init};
-      cgh.parallel_for<class Init2>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Init_B>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
 
@@ -60,13 +60,13 @@ int main() {
       });
     });
 
-    // Launch an asynchronous kernel to compute matrix addition c = a + b
+    // Compute c = a + b
     queue.submit([&](sycl::handler& cgh) {
       sycl::accessor<float, 2> A{buffer_a, cgh, sycl::read_only};
       sycl::accessor<float, 2> B{buffer_b, cgh, sycl::read_only};
       sycl::accessor<float, 2> C{buffer_c, cgh, sycl::write_only, sycl::no_init};
 
-      cgh.parallel_for<class Compute>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Compute_C>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
 

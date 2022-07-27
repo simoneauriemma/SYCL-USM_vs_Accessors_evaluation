@@ -3,12 +3,12 @@
 // #define DEBUG
 
 // Size of the matrices
-constexpr size_t ROWS = 4096;
-constexpr size_t COLUMNS = 4096;
-constexpr size_t WORK_GROUP_SIZE = 64;
+constexpr size_t ROWS = 2048;
+constexpr size_t COLUMNS = 2048;
+constexpr size_t WORK_GROUP_SIZE = 32;
 
 int main() {
-
+  // Variables declaration
   float *matrix_A_from_gpu = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
   float *matrix_B_from_gpu = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
   float *matrix_from_gpu = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
@@ -38,7 +38,7 @@ int main() {
 
     // Initialize a
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for<class Init1>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Init_A>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
         gpu_matrix_a[r * ROWS + c] = r + c;
@@ -47,16 +47,16 @@ int main() {
 
     // Initialize b
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for<class Init2>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Init_B>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
         gpu_matrix_b[r * ROWS + c] = r + c;
       });
     });
 
-    // Compute c
+    // Compute c = a + b
     queue.submit([&](sycl::handler &cgh) {
-      cgh.parallel_for<class Compute>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
+      cgh.parallel_for<class Compute_C>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> item) {
         const size_t r = item.get_global_id(0);
         const size_t c = item.get_global_id(1);
         gpu_matrix_c[r * ROWS + c] = gpu_matrix_a[r * ROWS + c] + gpu_matrix_b[r * ROWS + c];

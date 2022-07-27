@@ -75,6 +75,7 @@
     "csignal": "cpp",
     "future": "cpp",
     "cfenv": "cpp",
-    "*.ipp": "cpp"
+    "*.ipp": "cpp",
+    "semaphore": "cpp"
   },
 }
