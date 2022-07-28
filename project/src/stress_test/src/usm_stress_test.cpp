@@ -159,7 +159,7 @@ int main() {
           start = std::chrono::steady_clock::now();
 
           // Execute kernel
-          cgh.parallel_for(sycl::range<1>(10000), [=](sycl::id<1> idx) {
+          cgh.parallel_for(sycl::range<1>(31), [=](sycl::id<1> idx) {
             *var0_Gpu += *var30_Gpu * *var0_Gpu;
             *var1_Gpu += *var29_Gpu * *var1_Gpu;
             *var2_Gpu += *var28_Gpu * *var2_Gpu;

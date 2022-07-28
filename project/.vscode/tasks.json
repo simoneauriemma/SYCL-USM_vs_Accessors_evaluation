@@ -6,7 +6,7 @@
     {
       "type": "shell",
       "label": "Create qdrep file - MA",
-      "command": "nsys profile -o results/qdreps/${fileBasenameNoExtension} ./build/src/matrix_addition/${fileBasenameNoExtension}",
+      "command": "nsys profile --force-overwrite true -o results/qdreps/${fileBasenameNoExtension} ./build/src/matrix_addition/${fileBasenameNoExtension}",
       "presentation": {
         "reveal": "always"
       },
@@ -21,7 +21,7 @@
     {
       "type": "shell",
       "label": "Create qdrep file - MM",
-      "command": "nsys profile -o results/qdreps/${fileBasenameNoExtension} ./build/src/matrix_multiplication/${fileBasenameNoExtension}",
+      "command": "nsys profile --force-overwrite true -o results/qdreps/${fileBasenameNoExtension} ./build/src/matrix_multiplication/${fileBasenameNoExtension}",
       "presentation": {
         "reveal": "always"
       },
@@ -36,7 +36,7 @@
     {
       "type": "shell",
       "label": "Create qdrep file - ST",
-      "command": "nsys profile -o results/qdreps/${fileBasenameNoExtension} ./build/src/stress_test/${fileBasenameNoExtension}",
+      "command": "nsys profile --force-overwrite true -o results/qdreps/${fileBasenameNoExtension} ./build/src/stress_test/${fileBasenameNoExtension}",
       "presentation": {
         "reveal": "always"
       },

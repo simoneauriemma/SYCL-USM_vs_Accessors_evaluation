@@ -127,7 +127,7 @@ int main() {
           start = std::chrono::steady_clock::now();
 
           // Execute kernel
-          cgh.parallel_for(sycl::range<1>(10000), [=](sycl::id<1> idx) {
+          cgh.parallel_for(sycl::range<1>(31), [=](sycl::id<1> idx) {
             accessor_0[0] += accessor_30[0] * accessor_0[0];
             accessor_1[0] += accessor_29[0] * accessor_1[0];
             accessor_2[0] += accessor_28[0] * accessor_2[0];

@@ -1,2 +1,4 @@
 add_sycl_executable(acc_stress_test acc_stress_test.cpp)
+add_sycl_executable(acc_stress_test_v2 acc_stress_test_v2.cpp)
 add_sycl_executable(usm_stress_test usm_stress_test.cpp)
+add_sycl_executable(usm_stress_test_v2 usm_stress_test_v2.cpp)
