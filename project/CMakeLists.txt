@@ -35,4 +35,4 @@ endif()
 
 add_subdirectory(src/matrix_multiplication)
 add_subdirectory(src/matrix_addition)
-add_subdirectory(src/stress_test)
+add_subdirectory(src/data_dependency_test)

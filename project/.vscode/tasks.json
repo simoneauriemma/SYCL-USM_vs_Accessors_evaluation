@@ -35,8 +35,8 @@
     },
     {
       "type": "shell",
-      "label": "Create qdrep file - ST",
-      "command": "nsys profile --force-overwrite true -o results/qdreps/${fileBasenameNoExtension} ./build/src/stress_test/${fileBasenameNoExtension}",
+      "label": "Create qdrep file - DDT",
+      "command": "nsys profile --force-overwrite true -o results/qdreps/${fileBasenameNoExtension} ./build/src/data_dependency_test/${fileBasenameNoExtension}",
       "presentation": {
         "reveal": "always"
       },
