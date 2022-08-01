@@ -3,11 +3,15 @@
 // #define DEBUG
 
 // Size of the matrices
-constexpr size_t ROWS = 2048;
-constexpr size_t COLUMNS = 2048;
+// constexpr size_t ROWS = 2048;
+// constexpr size_t COLUMNS = 2048;
 constexpr size_t WORK_GROUP_SIZE = 32;
 
-int main() {
+int main(int argc, char *argv[]) {
+
+  size_t ROWS = size_t(atoi(argv[1]));
+  size_t COLUMNS = size_t(atoi(argv[2]));
+
   // Variables declaration
   float *matrix_A_from_gpu = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
   float *matrix_B_from_gpu = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
@@ -17,6 +21,9 @@ int main() {
   std::chrono::_V2::steady_clock::time_point start;
   std::chrono::_V2::steady_clock::time_point end;
   std::chrono::duration<double> elapsed_seconds;
+
+  // Start timer
+  start = std::chrono::steady_clock::now();
 
   try {
     // Create a queue to work on
@@ -32,9 +39,6 @@ int main() {
     float *gpu_matrix_a = sycl::malloc_device<float>(ROWS * COLUMNS, queue);
     float *gpu_matrix_b = sycl::malloc_device<float>(ROWS * COLUMNS, queue);
     float *gpu_matrix_c = sycl::malloc_device<float>(ROWS * COLUMNS, queue);
-
-    // Start timer
-    start = std::chrono::steady_clock::now();
 
     // Initialize a
     queue.submit([&](sycl::handler &cgh) {

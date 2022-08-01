@@ -8,11 +8,14 @@ void sequential_matrix_multiplication(int, int, float *, float *, float *);
 int check_is_correct(int, int, float *, float *);
 
 // Size of the matrices
-constexpr size_t ROWS = 2048;
-constexpr size_t COLUMNS = 2048;
+// constexpr size_t ROWS = 2048;
+// constexpr size_t COLUMNS = 2048;
 constexpr size_t WORK_GROUP_SIZE = 32;
 
-int main() {
+int main(int argc, char *argv[]) {
+
+  size_t ROWS = size_t(atoi(argv[1]));
+  size_t COLUMNS = size_t(atoi(argv[2]));
 
   // Variables declaration
   float *matrix_a = (float *)malloc(sizeof(float) * ROWS * COLUMNS);
@@ -31,6 +34,9 @@ int main() {
   std::chrono::_V2::steady_clock::time_point start;
   std::chrono::_V2::steady_clock::time_point end;
   std::chrono::duration<double> elapsed_seconds;
+
+  // Start timer
+  start = std::chrono::steady_clock::now();
 
   try {
     // Device selector
@@ -56,9 +62,6 @@ int main() {
     // Queue
     queue
         .submit([&](sycl::handler &cgh) {
-          // Start timer
-          start = std::chrono::steady_clock::now();
-
           cgh.parallel_for<class Compute>(sycl::nd_range<2>{{ROWS, COLUMNS}, {WORK_GROUP_SIZE, WORK_GROUP_SIZE}}, [=](sycl::nd_item<2> idx) {
             const size_t r = idx.get_global_id(0);
             const size_t c = idx.get_global_id(1);

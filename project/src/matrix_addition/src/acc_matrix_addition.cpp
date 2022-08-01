@@ -1,17 +1,24 @@
 #include <include.hpp>
 
-#define DEBUG
+// #define DEBUG
 
 // Size of the matrices
-constexpr size_t ROWS = 2048;
-constexpr size_t COLUMNS = 2048;
+// constexpr size_t ROWS = 2048;
+// constexpr size_t COLUMNS = 2048;
 constexpr size_t WORK_GROUP_SIZE = 32;
 
-int main() {
+int main(int argc, char* argv[]) {
+
+  size_t ROWS = size_t(atoi(argv[1]));
+  size_t COLUMNS = size_t(atoi(argv[2]));
+
   // Timers
   std::chrono::_V2::steady_clock::time_point start;
   std::chrono::_V2::steady_clock::time_point end;
   std::chrono::duration<double> elapsed_seconds;
+
+  // Start timer
+  start = std::chrono::steady_clock::now();
 
   try {
     // Create a queue to work on
@@ -27,9 +34,6 @@ int main() {
     sycl::buffer<float, 2> buffer_a{sycl::range<2>{ROWS, COLUMNS}};
     sycl::buffer<float, 2> buffer_b{sycl::range<2>{ROWS, COLUMNS}};
     sycl::buffer<float, 2> buffer_c{sycl::range<2>{ROWS, COLUMNS}};
-
-    // Start timer
-    start = std::chrono::steady_clock::now();
 
     // Initialize a
     queue.submit([&](sycl::handler& cgh) {

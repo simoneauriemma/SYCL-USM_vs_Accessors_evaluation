@@ -20,6 +20,10 @@ int main() {
   std::chrono::_V2::steady_clock::time_point end;
   std::chrono::duration<float> elapsed_seconds;
 
+  // Start timer
+  start = std::chrono::steady_clock::now();
+  sycl::buffer<float, 1> buffer_out{sycl::range<1>{SIZE}};
+
   try {
     // Device selector
 #if DEVICE_VALUE == CPU_DEVICE
@@ -32,11 +36,7 @@ int main() {
 
     // Buffers
     sycl::buffer<float, 1> buffer_var(variables, sycl::range{SIZE});
-    sycl::buffer<float, 1> buffer_out{sycl::range<1>{SIZE}};
     // sycl::buffer<float, 1> buffer_out(output, sycl::range{SIZE});
-
-    // Start timer
-    start = std::chrono::steady_clock::now();
 
     // Queue - FIRST TASK
     queue.submit([&](sycl::handler &cgh) {
@@ -66,12 +66,6 @@ int main() {
       });
     });
 
-    sycl::host_accessor host_accessor_output{buffer_out, sycl::read_only};
-    // Stampa finale
-    for (int i = 0; i < SIZE; i++) {
-      std::cout << "Variabile var_" << i << " - valore: " << std::setprecision(10) << host_accessor_output[i] << std::endl;
-    }
-
   } catch (const sycl::exception &e) {
     std::cout << "Exception caught: " << e.what() << std::endl;
   }
@@ -80,4 +74,10 @@ int main() {
   end = std::chrono::steady_clock::now();
   elapsed_seconds = end - start;
   std::cout << "- Parallel time in seconds: " << elapsed_seconds.count() << std::endl;
+
+  sycl::host_accessor host_accessor_output{buffer_out, sycl::read_only};
+  // Stampa finale
+  for (int i = 0; i < SIZE; i++) {
+    std::cout << "Variabile var_" << i << " - valore: " << std::setprecision(10) << host_accessor_output[i] << std::endl;
+  }
 }

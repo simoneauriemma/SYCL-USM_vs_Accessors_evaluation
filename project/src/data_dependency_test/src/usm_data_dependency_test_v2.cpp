@@ -22,6 +22,9 @@ int main() {
   std::chrono::_V2::steady_clock::time_point end;
   std::chrono::duration<float> elapsed_seconds;
 
+  // Start timer
+  start = std::chrono::steady_clock::now();
+
   try {
     // Device selector
 #if DEVICE_VALUE == CPU_DEVICE
@@ -38,9 +41,6 @@ int main() {
 
     // Copy data from CPU to GPU
     queue.memcpy(variables_Gpu, variables, SIZE * sizeof(float)).wait();
-
-    // Start timer
-    start = std::chrono::steady_clock::now();
 
     // Queue - FIRST TASK
     queue.submit([&](sycl::handler &cgh) {
