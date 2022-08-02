@@ -1,4 +1,4 @@
-add_sycl_executable(acc_data_dependency_test acc_data_dependency_test.cpp)
+# add_sycl_executable(acc_data_dependency_test acc_data_dependency_test.cpp)
 add_sycl_executable(acc_data_dependency_test_v2 acc_data_dependency_test_v2.cpp)
-add_sycl_executable(usm_data_dependency_test usm_data_dependency_test.cpp)
+# add_sycl_executable(usm_data_dependency_test usm_data_dependency_test.cpp)
 add_sycl_executable(usm_data_dependency_test_v2 usm_data_dependency_test_v2.cpp)
